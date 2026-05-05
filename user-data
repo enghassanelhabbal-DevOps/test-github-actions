@@ -3,13 +3,13 @@
 # 1. Update
 apt update -y
 
-# 2. Install Java
-apt install -y openjdk-17-jdk
+# 2. Install Java 21
+apt install -y openjdk-21-jdk
 
 # 3. Install curl
 apt install -y curl
 
-# 4. Install NVM for ubuntu user
+# 4. Install NVM + Node for ubuntu user
 sudo -u ubuntu bash << 'EOF'
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
 
