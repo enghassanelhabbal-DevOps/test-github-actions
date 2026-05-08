@@ -1,0 +1,61 @@
+pipeline {
+  agent { label 'EC2-Linux' }
+
+  environment {
+    APP_NAME    = 'jenkins-cicd-lab'
+    ENVIRONMENT = 'staging'
+    VERSION     = "1.0.${BUILD_NUMBER}"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        echo "Building: ${APP_NAME}"
+        echo "Version:  ${VERSION}"
+        echo "Env:      ${ENVIRONMENT}"
+        git branch: 'main',
+            url: 'https://github.com/AbdelrhmanEzzat/digi-jenkins.git'
+      }
+    }
+
+    stage('Install') {
+      steps {
+        sh '''
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+          npm install
+        '''
+      }
+    }
+
+    stage('Test') {
+      steps {
+        sh '''
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+          npm test
+        '''
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        echo "Deploying ${APP_NAME} v${VERSION} to ${ENVIRONMENT}..."
+        echo "Deploy done ✅"
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "✅ ${APP_NAME} v${VERSION} deployed to ${ENVIRONMENT} successfully!"
+    }
+    failure {
+      echo "❌ ${APP_NAME} v${VERSION} FAILED!"
+    }
+    always {
+      echo "Build #${BUILD_NUMBER} finished."
+      cleanWs()
+    }
+  }
+}

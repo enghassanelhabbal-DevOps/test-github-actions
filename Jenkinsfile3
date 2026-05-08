@@ -1,0 +1,79 @@
+pipeline {
+  agent { label 'EC2-Linux' }
+
+  parameters {
+    choice(
+      name: 'ENVIRONMENT',
+      choices: ['staging', 'production'],
+      description: 'Choose deploy target'
+    )
+    string(
+      name: 'VERSION',
+      defaultValue: '1.0.0',
+      description: 'Version to deploy'
+    )
+    booleanParam(
+      name: 'RUN_TESTS',
+      defaultValue: true,
+      description: 'Run tests before deploy?'
+    )
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        echo "Environment: ${params.ENVIRONMENT}"
+        echo "Version:     ${params.VERSION}"
+        echo "Run Tests:   ${params.RUN_TESTS}"
+        git branch: 'main',
+            url: 'https://github.com/AbdelrhmanEzzat/digi-jenkins.git'
+      }
+    }
+
+    stage('Install') {
+      steps {
+        sh '''
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+          npm install
+        '''
+      }
+    }
+
+    stage('Test') {
+      when {
+        expression { params.RUN_TESTS == true }
+      }
+      steps {
+        sh '''
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+          npm test
+        '''
+      }
+    }
+
+    stage('Approval') {
+      when {
+        expression { params.ENVIRONMENT == 'production' }
+      }
+      steps {
+        input message: "Deploy v${params.VERSION} to PRODUCTION?",
+              ok: 'Yes, Deploy!'
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        echo "Deploying v${params.VERSION} to ${params.ENVIRONMENT}..."
+        echo "✅ Deploy done!"
+      }
+    }
+  }
+
+  post {
+    success { echo "✅ Done!" }
+    failure  { echo "❌ Failed!" }
+    always   { cleanWs() }
+  }
+}
