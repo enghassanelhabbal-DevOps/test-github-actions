@@ -1,5 +1,5 @@
 pipeline {
-  agent { label 'EC2-Linux' }
+  agent { label 'ec2-agent2' }
 
   environment {
     APP_NAME    = 'jenkins-cicd-lab'
