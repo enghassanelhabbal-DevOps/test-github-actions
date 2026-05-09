@@ -1,5 +1,5 @@
 pipeline {
-  agent { label 'ec2-agent2' }
+  agent { label 'node-agent' }
 
   parameters {
     choice(
