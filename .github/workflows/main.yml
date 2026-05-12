@@ -18,7 +18,7 @@ jobs:
 
     # WHERE to run
 
-    runs-on: my ec2 runner
+    runs-on: "my ec2 runner"
 
     steps:
 
