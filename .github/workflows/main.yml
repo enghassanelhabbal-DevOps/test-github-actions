@@ -18,7 +18,7 @@ jobs:
 
     # WHERE to run
 
-    runs-on: rana-1
+    runs-on: my ec2 runner
 
     steps:
 
